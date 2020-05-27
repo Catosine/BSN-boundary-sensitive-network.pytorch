@@ -1,0 +1,6 @@
+/data/activitynet_annotations
+/data/activitynet_feature_cuhk
+/output/P*
+/output/T*
+/runs/*
+bsn.sh
