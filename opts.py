@@ -44,7 +44,9 @@ def parse_opt():
     parser.add_argument(
         '--temporal_scale',
         type=int,
-        default=512)
+        #default=100,
+        default=512
+        )
     parser.add_argument(
         '--boundary_ratio',
         type=float,

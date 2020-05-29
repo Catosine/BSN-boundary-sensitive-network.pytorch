@@ -210,8 +210,8 @@ def BSN_inference_TEM(opt):
     #                                           num_workers=8, pin_memory=True, drop_last=False)
 
     test_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset="full"),
-                                               batch_size=model.module.batch_size, shuffle=False,
-                                               num_workers=8, pin_memory=True, drop_last=False)
+                                               batch_size=1, shuffle=False,
+                                               num_workers=8, pin_memory=False, drop_last=False)
 
     columns = ["action", "start", "end", "xmin", "xmax"]
     for index_list, input_data, anchor_xmin, anchor_xmax in test_loader:
