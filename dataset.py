@@ -38,12 +38,13 @@ class VideoDataSet(data.Dataset):
         self.video_dict = {}
         for i in range(len(anno_df)):
             video_name=anno_df.video.values[i]
-            video_info=anno_database[video_name]
-            video_subset=anno_df.subset.values[i]
-            if self.subset == "full":
-                self.video_dict[video_name] = video_info
-            if self.subset in video_subset:
-                self.video_dict[video_name] = video_info
+            if video_name in anno_database:
+                video_info=anno_database[video_name]
+                video_subset=anno_df.subset.values[i]
+                if self.subset == "full":
+                    self.video_dict[video_name] = video_info
+                if self.subset in video_subset:
+                    self.video_dict[video_name] = video_info
         self.video_list = self.video_dict.keys()
         print "%s subset video numbers: %d" %(self.subset,len(self.video_list))
 
@@ -166,6 +167,8 @@ class ProposalDataSet(data.Dataset):
 
     def __getitem__(self, index):
         video_name = self.video_list[index]
+        if "." in video_name:
+            video_name = video_name.split(".")[0]
         pdf=pandas.read_csv("./output/PGM_proposals/"+video_name+".csv")
         pdf=pdf[:self.top_K]
         video_feature = numpy.load("./output/PGM_feature/" + video_name+".npy")

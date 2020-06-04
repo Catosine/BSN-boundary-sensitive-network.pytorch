@@ -37,7 +37,7 @@ def generateProposals(opt,video_list,video_dict):
     peak_thres= opt["pgm_threshold"]
 
     for video_name in video_list:
-        tdf=pandas.read_csv("./output/TEM_results/"+video_name+".csv")
+        tdf=pandas.read_csv("./output/TEM_results/"+video_name.split(".")[0]+".csv")
         start_scores=tdf.start.values[:]
         end_scores=tdf.end.values[:]
         
@@ -91,31 +91,34 @@ def generateProposals(opt,video_list,video_dict):
         
         new_df=new_df.sort_values(by="score",ascending=False)
         
-        video_info=video_dict[video_name]
-        video_frame=video_info['duration_frame']
-        video_second=video_info['duration_second']
-        feature_frame=video_info['feature_frame']
-        corrected_second=float(feature_frame)/video_frame*video_second
         
-        try:
-            gt_xmins=[]
-            gt_xmaxs=[]
-            for idx in range(len(video_info["annotations"])):
-                gt_xmins.append(video_info["annotations"][idx]["segment"][0]/corrected_second)
-                gt_xmaxs.append(video_info["annotations"][idx]["segment"][1]/corrected_second)
-            new_iou_list=[]
-            for j in range(len(new_df)):
-                tmp_new_iou=max(iou_with_anchors(new_df.xmin.values[j],new_df.xmax.values[j],gt_xmins,gt_xmaxs))
-                new_iou_list.append(tmp_new_iou)
+        # video_info=video_dict[video_name]
+        # video_frame=video_info['duration_frame']
+        # video_second=video_info['duration_second']
+        # feature_frame=video_info['feature_frame']
+        # corrected_second=float(feature_frame)/video_frame*video_second
+        
+        # try:
+        #     gt_xmins=[]
+        #     gt_xmaxs=[]
+        #     for idx in range(len(video_info["annotations"])):
+        #         gt_xmins.append(video_info["annotations"][idx]["segment"][0]/corrected_second)
+        #         gt_xmaxs.append(video_info["annotations"][idx]["segment"][1]/corrected_second)
+        #     new_iou_list=[]
+        #     for j in range(len(new_df)):
+        #         tmp_new_iou=max(iou_with_anchors(new_df.xmin.values[j],new_df.xmax.values[j],gt_xmins,gt_xmaxs))
+        #         new_iou_list.append(tmp_new_iou)
                 
-            new_ioa_list=[]
-            for j in range(len(new_df)):
-                tmp_new_ioa=max(ioa_with_anchors(new_df.xmin.values[j],new_df.xmax.values[j],gt_xmins,gt_xmaxs))
-                new_ioa_list.append(tmp_new_ioa)
-            new_df["match_iou"]=new_iou_list
-            new_df["match_ioa"]=new_ioa_list
-        except:
-            pass
+        #     new_ioa_list=[]
+        #     for j in range(len(new_df)):
+        #         tmp_new_ioa=max(ioa_with_anchors(new_df.xmin.values[j],new_df.xmax.values[j],gt_xmins,gt_xmaxs))
+        #         new_ioa_list.append(tmp_new_ioa)
+        #     new_df["match_iou"]=new_iou_list
+        #     new_df["match_ioa"]=new_ioa_list
+        # except:
+        #     pass
+        if "." in video_name:
+            video_name = video_name.split(".")[0]
         new_df.to_csv("./output/PGM_proposals/"+video_name+".csv",index=False)
 
 
@@ -130,7 +133,7 @@ def getDatasetDict(opt):
         video_new_info={}
         video_new_info['duration_frame']=video_info['duration_frame']
         video_new_info['duration_second']=video_info['duration_second']
-        video_new_info["feature_frame"]=video_info['feature_frame']
+        # video_new_info["feature_frame"]=video_info['feature_frame']
         video_new_info['annotations']=video_info['annotations']
         video_new_info['subset'] = df.subset.values[i]
         video_dict[video_name]=video_new_info
@@ -144,6 +147,9 @@ def generateFeature(opt,video_list,video_dict):
     num_sample_interpld = opt["num_sample_interpld"]
 
     for video_name in video_list:
+        video_subset = video_dict[video_name]['subset']
+        if "." in video_name:
+            video_name = video_name.split(".")[0]
         adf=pandas.read_csv("./output/TEM_results/"+video_name+".csv")
         score_action=adf.action.values[:]
         seg_xmins = adf.xmin.values[:]
@@ -152,7 +158,6 @@ def generateFeature(opt,video_list,video_dict):
         video_gap = seg_xmaxs[0] - seg_xmins[0]
         video_extend = video_scale / 4 + 10
         pdf=pandas.read_csv("./output/PGM_proposals/"+video_name+".csv")
-        video_subset = video_dict[video_name]['subset']
         if video_subset == "training":
             pdf=pdf[:opt["pem_top_K"]]
         else:

@@ -22,13 +22,13 @@ def parse_opt():
         '--video_info',
         type=str,
         #default="./data/activitynet_annotations/video_info_new.csv"
-        default="./data/tempuckey_annotations/tempuckey_labels_full.csv"
+        default="./data/tempuckey_annotations/new_tempuckey_infos.csv"
         )
     parser.add_argument(
         '--video_anno',
         type=str,
         #default="./data/activitynet_annotations/anet_anno_action.json"
-        default="./data/tempuckey_annotations/labels.json"
+        default="./data/tempuckey_annotations/tempuckey_label.json"
         )
     parser.add_argument(
         '--pca_model',
@@ -164,7 +164,7 @@ def parse_opt():
     parser.add_argument(
         '--pem_low_iou_thres',
         type=float,
-        default=2.2)
+        default=0.2)
 
     # PEM inference settings
     parser.add_argument(
