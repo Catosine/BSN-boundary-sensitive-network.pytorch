@@ -20,7 +20,7 @@ def getDatasetDict(opt):
         video_new_info={}
         video_new_info['duration_frame']=video_info['duration_frame']
         video_new_info['duration_second']=video_info['duration_second']
-        video_new_info["feature_frame"]=video_info['feature_frame']
+        # video_new_info["feature_frame"]=video_info['feature_frame']
         video_subset=df.subset.values[i]
         video_new_info['annotations']=video_info['annotations']
         if video_subset==opt["pem_inference_subset"]:
@@ -75,7 +75,7 @@ def Soft_NMS(df,opt):
 def video_post_process(opt,video_list,video_dict):
 
     for video_name in video_list:
-        df=pd.read_csv("./output/PEM_results/"+video_name+".csv")
+        df=pd.read_csv("./output/PEM_results/"+video_name.split(".")[0]+".csv")
     
         df['score']=df.iou_score.values[:]*df.xmin_score.values[:]*df.xmax_score.values[:]
         if len(df)>1:

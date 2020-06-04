@@ -246,10 +246,13 @@ def BSN_inference_PEM(opt):
     model.eval()
 
     test_loader = torch.utils.data.DataLoader(ProposalDataSet(opt, subset=opt["pem_inference_subset"]),
-                                              batch_size=model.module.batch_size, shuffle=False,
+                                              batch_size=1, shuffle=False,
                                               num_workers=8, pin_memory=True, drop_last=False)
+    
+    #num_of_video=0
 
     for idx, (video_feature, video_xmin, video_xmax, video_xmin_score, video_xmax_score) in enumerate(test_loader):
+        #num_of_video=idx
         video_name = test_loader.dataset.video_list[idx]
         video_conf = model(video_feature).view(-1).detach().cpu().numpy()
         video_xmin = video_xmin.view(-1).cpu().numpy()
@@ -264,8 +267,8 @@ def BSN_inference_PEM(opt):
         df["xmax_score"] = video_xmax_score
         df["iou_score"] = video_conf
 
-        df.to_csv("./output/PEM_results/" + video_name + ".csv", index=False)
-
+        df.to_csv("./output/PEM_results/" + video_name.split(".")[0] + ".csv", index=False)
+    #print("num of videos: {}".format(num_of_video))
 
 def main(opt):
     if opt["module"] == "TEM":
