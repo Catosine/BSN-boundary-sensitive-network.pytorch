@@ -8,9 +8,9 @@ from tqdm import tqdm
 def parseInput():
     parser = argparse.ArgumentParser()
     parser.add_argument("--label_file", type=str,
-                        default="/usr/local/data02/zahra/datasets/Tempuckey/labels/tempuckey_ground_truth_annotations_clean.json", help="label file")
+                        default="/usr/local/data02/zahra/datasets/Tempuckey/labels/tempuckey_ground_truth_annotations.json", help="label file")
     parser.add_argument("--video_file", type=str,
-                        default="/usr/local/data02/pengnanf/BSN-boundary-sensitive-network.pytorch/data/tempuckey_annotations/tempuckey_infos.csv", help="video file")
+                        default="/usr/local/data02/pengnanf/BSN-boundary-sensitive-network.pytorch/data/tempuckey_annotations/tempuckey_video_info_split.csv", help="video file")
     parser.add_argument("--video_dir", type=str,
                         default="/usr/local/data02/zahra/datasets/Tempuckey/all_videos_UNLABELED", help="raw video directory")
     parser.add_argument("--json_name", type=str,

@@ -5,9 +5,19 @@ import pandas
 import torch.multiprocessing as mp
 from scipy.interpolate import interp1d
 
+def convert(input):
+    if isinstance(input, dict):
+        return {convert(k):convert(v) for k,v in input.iteritems()}
+    elif isinstance(input, list):
+        return [convert(i) for i in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
 def load_json(file):
     with open(file) as json_file:
-        data = json.load(json_file)
+        data = convert(json.load(json_file))
         return data
     
 def iou_with_anchors(anchors_min,anchors_max,box_min,box_max):
@@ -124,7 +134,9 @@ def generateProposals(opt,video_list,video_dict):
 
 def getDatasetDict(opt):
     df=pandas.read_csv(opt["video_info"])
-    json_data= load_json(opt["video_anno"])
+    json_data = load_json(opt["video_anno"])
+    #if opt['customized_data']:
+    #    json_data = json_data['results']
     database=json_data
     video_dict = {}
     for i in range(len(df)):

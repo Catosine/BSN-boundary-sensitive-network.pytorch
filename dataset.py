@@ -11,9 +11,19 @@ from sklearn.decomposition import PCA
 from sklearn.externals import joblib
 from scipy.interpolate import interp2d
 
+def unicode_convert(input):
+    if isinstance(input, dict):
+        return {unicode_convert(key): unicode_convert(value) for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [unicode_convert(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
 def load_json(file):
     with open(file) as json_file:
-        data = json.load(json_file)
+        data = unicode_convert(json.load(json_file))
         return data
 
 class VideoDataSet(data.Dataset):
@@ -28,6 +38,7 @@ class VideoDataSet(data.Dataset):
         self.video_anno_path = opt["video_anno"]
         self.pca_model = joblib.load(opt["pca_model"])
         self.customized_data = opt['customized_data']
+        self.di = opt['dyn_image']
         self.interpolation_size = opt['reshape_size']
 
         self._getDatasetDict()
@@ -35,6 +46,8 @@ class VideoDataSet(data.Dataset):
     def _getDatasetDict(self):
         anno_df = pd.read_csv(self.video_info_path) # video info, the csv file
         anno_database= load_json(self.video_anno_path) # label
+        #if self.customized_data:
+        #    anno_database = anno_database['results']
         self.video_dict = {}
         for i in range(len(anno_df)):
             video_name=anno_df.video.values[i]
@@ -62,7 +75,10 @@ class VideoDataSet(data.Dataset):
         anchor_xmin=[self.temporal_gap*i for i in range(self.temporal_scale)]
         anchor_xmax=[self.temporal_gap*i for i in range(1,self.temporal_scale+1)]
         if self.customized_data:
-            video_data = np.load(self.feature_path+video_name.split('.')[0]+".npy")
+            if self.di:
+                video_data = np.load(self.feature_path+video_name.split('.')[0]+"_DI_resnet_feats.npy")
+            else:
+                video_data = np.load(self.feature_path+video_name.split('.')[0]+".npy")
             video_data = self.pca_model.transform(video_data)
             # need interpolation
             x, y = video_data.shape
@@ -87,7 +103,8 @@ class VideoDataSet(data.Dataset):
         video_info=self.video_dict[video_name]
         video_frame=video_info['duration_frame']
         video_second=video_info['duration_second']
-        feature_frame=video_info['feature_frame']
+        #feature_frame=video_info['feature_frame']
+        feature_frame=video_info['duration_frame']
         corrected_second=float(feature_frame)/video_frame*video_second
         video_labels=video_info['annotations']
     

@@ -2,6 +2,7 @@ import sys
 
 sys.dont_write_bytecode = True
 import os
+import os.path as osp
 import json
 import torch
 import torch.nn.parallel
@@ -75,10 +76,11 @@ def test_TEM(data_loader, model, epoch, writer, opt):
         epoch_end_loss / (n_iter + 1))
     state = {'epoch': epoch + 1,
              'state_dict': model.state_dict()}
-    torch.save(state, opt["checkpoint_path"] + "/tem_checkpoint.pth.tar")
+    train_folder = "/"+opt["feature_path"].split('/')[-2]+"_actioness_loss_weight"+str(opt["actioness_loss_weight"])
+    torch.save(state, opt["checkpoint_path"]+train_folder+"/tem_checkpoint.pth.tar")
     if epoch_cost < model.module.tem_best_loss:
         model.module.tem_best_loss = np.mean(epoch_cost)
-        torch.save(state, opt["checkpoint_path"] + "/tem_best.pth.tar")
+        torch.save(state, opt["checkpoint_path"]+train_folder+"/tem_best.pth.tar")
 
 
 def train_PEM(data_loader, model, optimizer, epoch, writer, opt):
@@ -194,7 +196,11 @@ def customized_collate_fn(batch):
 
 def BSN_inference_TEM(opt):
     model = TEM(opt)
-    checkpoint = torch.load(opt["checkpoint_path"] + "/tem_best.pth.tar")
+    if opt['pretrained']:
+        path_to_checkpoint = opt["checkpoint_path"]
+    else:
+        path_to_checkpoint = opt["checkpoint_path"]+"/"+opt["feature_path"].split("/")[-2]+"_actioness_loss_weight"+str(opt["actioness_loss_weight"])
+    checkpoint = torch.load(path_to_checkpoint + "/tem_best.pth.tar")
     base_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint['state_dict'].items())}
     model.load_state_dict(base_dict)
     model = torch.nn.DataParallel(model, device_ids=[0]).cuda()
@@ -208,6 +214,8 @@ def BSN_inference_TEM(opt):
     #     test_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset="full"),
     #                                           batch_size=model.module.batch_size, shuffle=False,
     #                                           num_workers=8, pin_memory=True, drop_last=False)
+    
+    #pdb.set_trace()
 
     test_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset="full"),
                                                batch_size=1, shuffle=False,
@@ -288,6 +296,7 @@ def main(opt):
     elif opt["module"] == "PGM":
         if not os.path.exists("output/PGM_proposals"):
             os.makedirs("output/PGM_proposals")
+        #pdb.set_trace()
         print "PGM: start generate proposals"
         PGM_proposal_generation(opt)
         print "PGM: finish generate proposals"
@@ -328,9 +337,12 @@ if __name__ == '__main__':
     opt = vars(opt)
     #print(opt)
     #exit(0)
-    if not os.path.exists(opt["checkpoint_path"]):
-        os.makedirs(opt["checkpoint_path"])
-    opt_file = open(opt["checkpoint_path"] + "/opts.json", "w")
-    json.dump(opt, opt_file)
-    opt_file.close()
+    if opt["module"] == "TEM" and opt["mode"] == "train":
+        feature = "/"+opt["feature_path"].split("/")[-2]
+        save_path = opt["checkpoint_path"] + feature+"_actioness_loss_weight"+str(opt["actioness_loss_weight"])
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        opt_file = open(save_path + "/opts.json", "w")
+        json.dump(opt, opt_file)
+        opt_file.close()
     main(opt)

@@ -40,7 +40,7 @@ def TEM_loss_function(y_action,y_start,y_end,TEM_output,opt):
     loss_dict=TEM_loss_calc(anchors_action,anchors_start,anchors_end,
                      y_action,y_start,y_end,opt)
     
-    cost=2*loss_dict["loss_action"]+loss_dict["loss_start"]+loss_dict["loss_end"]
+    cost=opt["actioness_loss_weight"]*loss_dict["loss_action"]+loss_dict["loss_start"]+loss_dict["loss_end"]
     loss_dict["cost"] = cost
     return loss_dict
 

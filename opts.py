@@ -22,21 +22,33 @@ def parse_opt():
         '--video_info',
         type=str,
         #default="./data/activitynet_annotations/video_info_new.csv"
-        default="./data/tempuckey_annotations/new_tempuckey_infos.csv"
+        #default="./data/tempuckey_annotations/new_tempuckey_info_split.csv"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/labels/tempuckey_video_info_gt_labels_split.csv"
         )
     parser.add_argument(
         '--video_anno',
         type=str,
         #default="./data/activitynet_annotations/anet_anno_action.json"
-        default="./data/tempuckey_annotations/tempuckey_label.json"
+        #default="./data/tempuckey_annotations/video_labels.json"
+        #default="/usr/local/data02/zahra/datasets/Tempuckey/labels/tempuckey_ground_truth_annotations_pf_updated.json"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/labels/tempuckey_ground_truth_annotations_bsn.json"
         )
     parser.add_argument(
         '--pca_model',
         type=str,
-        default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/c2plus1d_kinetics8_pca_model.m"
+        #default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/c2plus1d_kinetics8_pca_model.m"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/dyn_image_win_8_resnet_pca_model.m"
     )
     parser.add_argument(
         '--customized_data',
+        action='store_true'
+    )
+    parser.add_argument(
+        '--dyn_image',
+        action='store_true'
+    )
+    parser.add_argument(
+        '--pretrained',
         action='store_true'
     )
     
@@ -55,7 +67,7 @@ def parse_opt():
         '--feature_path',
         type=str,
         #default="./data/activitynet_feature_cuhk/"
-        default="/usr/local/data02/zahra/datasets/Tempuckey/feats/c2plus1d_kinetics8/"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/feats/dyn_image/win_8_resnet/"
         )
     parser.add_argument(
         '--reshape_size',
@@ -123,6 +135,10 @@ def parse_opt():
         '--tem_match_thres',
         type=float,
         default=0.5)
+    parser.add_argument(
+        '--actioness_loss_weight',
+        type=float,
+        default=2.0)
 
     # PEM Training settings
     parser.add_argument(
@@ -226,7 +242,7 @@ def parse_opt():
     parser.add_argument(
         '--result_file',
         type=str,
-        default="./output/result_proposal.json")
+        default="./output/iou_search/result_proposal.json")
     parser.add_argument(
         '--save_fig_path',
         type=str,

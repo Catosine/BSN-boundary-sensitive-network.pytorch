@@ -117,7 +117,8 @@ def BSN_post_processing(opt):
     
     result_dict = dict(result_dict)
     output_dict={"version":"VERSION 1.3","results":result_dict,"external_data":{}}
-    outfile=open(opt["result_file"],"w")
+    result_file = "."+opt["result_file"].split(".")[1] + "_" + opt["feature_path"].split("/")[-2] + "_actioness_loss_weight" + str(opt["actioness_loss_weight"]) + "_iou_" + str(opt["pem_low_iou_thres"]) + "_" + str(opt["pem_high_iou_thres"])  + ".json"
+    outfile=open(result_file,"w")
     json.dump(output_dict,outfile)
     outfile.close()
 
