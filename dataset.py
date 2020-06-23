@@ -1,3 +1,17 @@
+"""
+@edited_by pengnan.fan@mail.mcgill.ca
+@last_update 22 Jun, 2020
+
+Change Log:
+
+[22 Jun, 2020]
+1. Implement unicode_converter to resolve unicode issue while reading json file. Search for "unicode_convert" to see details.
+2. Add 4 parameters in VideoDataSet.__init__. See the last four in __init__.
+3. Implement codes that will reshape the input model using PCA and linear interpolation in VideoDataSet._get_base_data.
+4. Commented out "feature_frame" in VideoDataSet._get_train_label.
+    
+"""
+
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd

@@ -1,3 +1,31 @@
+"""
+@edited_by pengnan.fan@mail.mcgill.ca
+@last_update 22 Jun, 2020
+
+Change Log:
+
+[22 Jun, 2020]
+Add following flags:
+    --pretrained
+        This is used to suggest using ActivityNet-pretrained BSN weights for training/inferencing
+    
+    --pca_model
+        This is used to show the path to certain pca models
+    
+    --customized_data
+        This is a flag used to indicate a non-ActivityNet data is feeding into BSN
+    
+    --dyn_image
+        This is a flag used to indicate a dynamic image extracted Tempuckey data is feeding into BSN
+    
+    --reshape_size
+        This is used to linear interpolate non-ActivityNet data for TEM.
+
+    --actioness_loss_weight
+        This is used to change the actioness weight of TEM loss.
+    
+"""
+
 import argparse
 
 
@@ -15,7 +43,7 @@ def parse_opt():
     parser.add_argument(
         '--checkpoint_path',
         type=str,
-        default='./checkpoint')
+        default='./tempuckey_checkpoint')
         
     # Overall Dataset settings
     parser.add_argument(
@@ -37,7 +65,7 @@ def parse_opt():
         '--pca_model',
         type=str,
         #default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/c2plus1d_kinetics8_pca_model.m"
-        default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/dyn_image_win_8_resnet_pca_model.m"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/tempuckey_pca/dyn_image_win_8_resnet_transformed_pca_model.m"
     )
     parser.add_argument(
         '--customized_data',
@@ -67,13 +95,15 @@ def parse_opt():
         '--feature_path',
         type=str,
         #default="./data/activitynet_feature_cuhk/"
-        default="/usr/local/data02/zahra/datasets/Tempuckey/feats/dyn_image/win_8_resnet/"
+        default="/usr/local/data02/zahra/datasets/Tempuckey/feats/dyn_image/win_8_resnet_transformed/"
         )
     parser.add_argument(
         '--reshape_size',
         type=int,
+        #default=512
         default=512
     )
+
     
     # PEM Dataset settings
     parser.add_argument(
@@ -186,7 +216,7 @@ def parse_opt():
     parser.add_argument(
         '--pem_inference_subset',
         type=str,
-        default="validation")
+        default="valid")
 
     # PGM settings
     parser.add_argument(
@@ -242,7 +272,7 @@ def parse_opt():
     parser.add_argument(
         '--result_file',
         type=str,
-        default="./output/iou_search/result_proposal.json")
+        default="./output/dyn_image/result_proposal.json")
     parser.add_argument(
         '--save_fig_path',
         type=str,

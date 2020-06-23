@@ -1,3 +1,16 @@
+"""
+@edited_by pengnan.fan@mail.mcgill.ca
+@last_update 22 Jun, 2020
+
+Change Log:
+
+[22 Jun, 2020]
+1. Implement unicode_converter to resolve unicode issue while reading json file. Search for "unicode_convert" to see details.
+2. Commented out lines of codes in generateProposals.
+3. Commented out "feature_frame" in getDatasetDict.
+    
+"""
+
 # -*- coding: utf-8 -*-
 import json
 import numpy

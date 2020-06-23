@@ -1,3 +1,14 @@
+"""
+@edited_by pengnan.fan@mail.mcgill.ca
+@last_update 22 Jun, 2020
+
+Change Log:
+
+[22 Jun, 2020]
+Add actioness weight parameters in TEM_loss_function.
+    
+"""
+
 # -*- coding: utf-8 -*-
 import torch
 import numpy as np

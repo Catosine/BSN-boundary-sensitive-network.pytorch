@@ -1,3 +1,11 @@
+"""
+@edited_by pengnan.fan@mail.mcgill.ca
+@last_update 22 Jun, 2020
+
+Change Log:
+    
+"""
+
 import sys
 
 sys.dont_write_bytecode = True
@@ -25,6 +33,7 @@ def train_TEM(data_loader, model, optimizer, epoch, writer, opt):
     epoch_start_loss = 0
     epoch_end_loss = 0
     epoch_cost = 0
+    print "------------------------------------------"
     for n_iter, (input_data, label_action, label_start, label_end) in enumerate(data_loader):
         #pdb.set_trace()
         TEM_output = model(input_data)
@@ -35,10 +44,20 @@ def train_TEM(data_loader, model, optimizer, epoch, writer, opt):
         cost.backward()
         optimizer.step()
 
+        #pdb.set_trace()
+
         epoch_action_loss += loss["loss_action"].cpu().detach().numpy()
         epoch_start_loss += loss["loss_start"].cpu().detach().numpy()
         epoch_end_loss += loss["loss_end"].cpu().detach().numpy()
         epoch_cost += loss["cost"].cpu().detach().numpy()
+        
+        temp_a = loss["loss_action"].cpu().detach().numpy()
+        temp_s = loss["loss_start"].cpu().detach().numpy()
+        temp_e = loss["loss_end"].cpu().detach().numpy()
+        
+        print "#%d action - %.03f, start - %.03f, end - %.03f" % (n_iter, temp_a, temp_s, temp_e)
+
+    #pdb.set_trace()
 
     writer.add_scalars('data/action', {'train': epoch_action_loss / (n_iter + 1)}, epoch)
     writer.add_scalars('data/start', {'train': epoch_start_loss / (n_iter + 1)}, epoch)
@@ -137,12 +156,15 @@ def BSN_Train_TEM(opt):
     train_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset="train"),
                                                batch_size=model.module.batch_size, shuffle=True,
                                                num_workers=8, pin_memory=True, drop_last=True)
-
-    test_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset="validation"),
+    
+    sbst='valid' if opt['customized_data'] else 'validation'
+    test_loader = torch.utils.data.DataLoader(VideoDataSet(opt, subset=sbst),
                                               batch_size=model.module.batch_size, shuffle=False,
                                               num_workers=8, pin_memory=True, drop_last=True)
 
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=opt["tem_step_size"], gamma=opt["tem_step_gamma"])
+    
+    #pdb.set_trace()
 
     for epoch in range(opt["tem_epoch"]):
         scheduler.step()
@@ -197,7 +219,7 @@ def customized_collate_fn(batch):
 def BSN_inference_TEM(opt):
     model = TEM(opt)
     if opt['pretrained']:
-        path_to_checkpoint = opt["checkpoint_path"]
+        path_to_checkpoint = './checkpoint'
     else:
         path_to_checkpoint = opt["checkpoint_path"]+"/"+opt["feature_path"].split("/")[-2]+"_actioness_loss_weight"+str(opt["actioness_loss_weight"])
     checkpoint = torch.load(path_to_checkpoint + "/tem_best.pth.tar")
@@ -240,6 +262,7 @@ def BSN_inference_TEM(opt):
             video_action = batch_action[batch_idx]
             video_start = batch_start[batch_idx]
             video_end = batch_end[batch_idx]
+
             video_result = np.stack((video_action, video_start, video_end, anchor_xmin, anchor_xmax), axis=1)
             video_df = pd.DataFrame(video_result, columns=columns)
             video_df.to_csv("./output/TEM_results/" + video + ".csv", index=False)
@@ -247,12 +270,16 @@ def BSN_inference_TEM(opt):
 
 def BSN_inference_PEM(opt):
     model = PEM(opt)
-    checkpoint = torch.load(opt["checkpoint_path"] + "/pem_best.pth.tar")
+    if opt['pretrained']:
+        checkpoint = torch.load('./checkpoint/pem_best.pth.tar')
+    else:
+        checkpoint = torch.load(opt["checkpoint_path"] + "/pem_best.pth.tar")
     base_dict = {'.'.join(k.split('.')[1:]): v for k, v in list(checkpoint['state_dict'].items())}
     model.load_state_dict(base_dict)
     model = torch.nn.DataParallel(model, device_ids=[0]).cuda()
     model.eval()
-
+    
+    #pdb.set_trace()
     test_loader = torch.utils.data.DataLoader(ProposalDataSet(opt, subset=opt["pem_inference_subset"]),
                                               batch_size=1, shuffle=False,
                                               num_workers=8, pin_memory=True, drop_last=False)
